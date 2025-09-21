@@ -1,0 +1,139 @@
+/* colors defined at top for easy configuring */
+@import url('/home/tonio/.cache/wal/colors-waybar.css');
+
+@define-color background @color0;
+@define-color light-background @color8;
+@define-color second-background @color4;
+@define-color text @color5;
+@define-color text-active @color1;
+@define-color borders @color9;
+
+
+/* font declared */
+* {
+  font-family: 'SpaceMono Nerd Font';
+  font-size: 15px;
+  min-height: 0;
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+}
+
+/* --- Waybar Container --- */
+#waybar {
+  background: transparent;
+  color: @text;
+  margin: 0px;
+  font-weight: 500;
+}
+
+#custom-arch,
+#cpu,
+#memory,
+#mpris,
+#workspaces,
+#window,
+#clock,
+#tray,
+#system,
+#custom-swaync
+{
+  background-color: @background;
+  padding: 0.3rem 0.7rem;
+  margin: 5px 0px; /* 5px top/bottom margin, 0px left/right (base for individual control) */
+  border-radius: 6px; /* These modules are always rounded */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-width: 0;
+  border: none;
+  /* Transition for background-color and color only */
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+#custom-swaync {
+    margin-right: 10px;
+    padding: 0.3rem 0.9rem 0.3rem 0.7rem;
+}
+
+#custom-arch {
+    margin-left: 10px;
+    padding: 0.3rem 1rem 0.3rem 0.7rem;
+}
+
+#pulseaudio {
+    margin-left: 5px;
+}
+#network,
+#battery
+{
+    margin-left: 10px;
+}
+
+#custom-bluetooth{
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+
+/* whats this?? */
+button {
+  border: none;
+}
+
+/* workspace pannel */
+#workspaces {
+  padding: 2px; /* Margin from the far left edge */
+}
+
+#workspaces button {
+  color: @text;
+  border-radius: 5px; /* Workspaces buttons are always rounded */
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  outline: none;
+}
+
+#workspaces button.active {
+  color: @text-active;
+}
+
+#workspaces button:hover {
+  box-shadow: inset 0 0 0 1px @text-active; /* Reference bright hover color */
+}
+
+/* center module  */
+#window{
+    padding: 0 5px;
+}
+
+/* Simple Hover effect for clock module - BRIGHTER COLOR */
+#clock:hover {
+  background-color: rgba(153, 209, 219, 0.1); /* Brighter highlight */
+  color: @background
+}
+
+
+#clock {
+  color: @text;
+  font-weight: 500;
+}
+
+/* --- Tooltip Styles --- */
+tooltip {
+  background-color: @background;
+  color: @text;
+  padding: 5px 12px;
+  margin: 5px 0px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+}
+
+.modules-left > *,
+.modules-center > *,
+.modules-right > * {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
