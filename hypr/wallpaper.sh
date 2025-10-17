@@ -10,7 +10,8 @@ SELECTED=$(ls "$WALLPAPER_DIR" | wofi --show dmenu -n --prompt "Select a wallpap
 [ -z "$SELECTED" ] && exit 1
 
 # Full path to the wallpaper
-WALLPAPER="$WALLPAPER_DIR/$SELECTED"
+export WALLPAPER="$WALLPAPER_DIR/$SELECTED"
+echo "\$wallpaper = $WALLPAPER" > /home/tonio/.config/hypr/current_wallpaper
 
 # Initialize swww if not running
 if ! pgrep -x swww-daemon > /dev/null; then
