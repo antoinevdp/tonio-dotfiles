@@ -1,0 +1,28 @@
+{
+    "checksum": "85cbd2e5759bea8c7d45a94196b06e17",
+    "wallpaper": "/home/tonio/Pictures/Wallpapers/porsche-917.jpg",
+    "alpha": "100",
+    "special": {
+        "background": "#131e2e",
+        "foreground": "#c4c6ca",
+        "cursor": "#c4c6ca"
+    },
+    "colors": {
+        "color0": "#131e2e",
+        "color1": "#A26A4A",
+        "color2": "#50798A",
+        "color3": "#5B9AAF",
+        "color4": "#6291A3",
+        "color5": "#97A2A8",
+        "color6": "#9ABBC7",
+        "color7": "#c4c6ca",
+        "color8": "#636b79",
+        "color9": "#A26A4A",
+        "color10": "#50798A",
+        "color11": "#5B9AAF",
+        "color12": "#6291A3",
+        "color13": "#97A2A8",
+        "color14": "#9ABBC7",
+        "color15": "#c4c6ca"
+    }
+}

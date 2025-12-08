@@ -1,0 +1,23 @@
+" Special
+let wallpaper  = "/home/tonio/Pictures/Wallpapers/Plain Fire Gradient.jpeg"
+let background = "#0b0b1b"
+let foreground = "#c2c2c6"
+let cursor     = "#c2c2c6"
+
+" Colors
+let color0  = "#0b0b1b"
+let color1  = "#FA4F27"
+let color2  = "#FD7030"
+let color3  = "#C37746"
+let color4  = "#74836C"
+let color5  = "#DE833F"
+let color6  = "#FA8B39"
+let color7  = "#c2c2c6"
+let color8  = "#5a5a6f"
+let color9  = "#FA4F27"
+let color10 = "#FD7030"
+let color11 = "#C37746"
+let color12 = "#74836C"
+let color13 = "#DE833F"
+let color14 = "#FA8B39"
+let color15 = "#c2c2c6"
