@@ -20,3 +20,4 @@ alias pamcan=pacman
 #   set_color cyan; echo (pwd)
 #   set_color green; echo '> '
 # end
+alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'

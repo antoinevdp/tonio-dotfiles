@@ -38,8 +38,20 @@
         "interval": 1,
         "dynamic-len": 40,
         "status-icons": {
-            "playing": "▶",
-            "paused": "⏸",
+            "playing": "⏸",
+            "paused": "▶",
+            "stopped": ""
+        },
+        "dynamic-order": ["title","artist"]
+    },
+
+    "mpd": {
+        "format": "{status_icon} {dynamic}",
+        "interval": 1,
+        "dynamic-len": 40,
+        "status-icons": {
+            "playing": "⏸",
+            "paused": "▶",
             "stopped": ""
         },
         "dynamic-order": ["title","artist"]
@@ -116,10 +128,24 @@
         "on-click": "wlogout"
     },
     "custom/swaync": {
-      "format": "",
+      "tooltip": false,
+      "format": "{icon}",
+      "format-icons": {
+        "notification": "<span foreground='red'><sup></sup></span>",
+        "none": "",
+        "dnd-notification": "<span foreground='red'><sup></sup></span>",
+        "dnd-none": "",
+        "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+        "inhibited-none": "",
+        "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+        "dnd-inhibited-none": ""
+      },
+      "return-type": "json",
+      "exec-if": "which swaync-client",
       "exec": "swaync-client -swb",
-      "on-click": "swaync-client --toggle-panel",
-      "interval": 0
+      "on-click": "swaync-client -t -sw",
+      "on-click-right": "swaync-client -d -sw",
+      "escape": true
     },
 
 
@@ -133,7 +159,7 @@
         "format-icons": [ "󰤯", "󰤟", "󰤢", "󰤥", "󰤨" ]
     },
     "custom/bluetooth": {
-        "format": "{}",
+        "format": "",
         "exec": "~/.config/waybar/scripts/bluetooth_status.sh",
         "interval": 5,
         "on-click": "blueman-manager"

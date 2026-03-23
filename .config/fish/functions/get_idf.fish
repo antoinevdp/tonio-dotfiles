@@ -1,4 +1,4 @@
-function get_idf --wraps='. /home/tonio/esp/esp-idf/export.sh' --wraps='. /home/tonio/esp/esp-idf/export.fish' --description 'alias get_idf=. /home/tonio/esp/esp-idf/export.fish'
-  . /home/tonio/esp/esp-idf/export.fish $argv
+function get_idf --wraps='. $HOME/esp/esp-idf/export.sh' --wraps='. $HOME/esp/esp-idf/export.fish' --description 'alias get_idf=. $HOME/esp/esp-idf/export.fish'
+  . $HOME/esp/esp-idf/export.fish $argv
         
 end
