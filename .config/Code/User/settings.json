@@ -1,0 +1,8 @@
+{
+    "workbench.colorTheme": "Atom One Dark",
+    "files.autoSave": "afterDelay",
+    "editor.fontFamily": "RobotoMono Nerd Font Mono,RobotoMono Nerd Font Mono Md",
+    "editor.fontSize": 13,
+    "workbench.editor.empty.hint": "hidden",
+    "chat.viewSessions.orientation": "stacked",
+}
