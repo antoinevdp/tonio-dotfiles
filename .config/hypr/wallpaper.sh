@@ -13,14 +13,14 @@ SELECTED=$(ls "$WALLPAPER_DIR" | wofi --show dmenu -n --prompt "Select a wallpap
 export WALLPAPER="$WALLPAPER_DIR/$SELECTED"
 echo "\$wallpaper = $WALLPAPER" > /home/tonio/.config/hypr/current_wallpaper
 
-# Initialize swww if not running
-if ! pgrep -x swww-daemon > /dev/null; then
-    swww init
+# Initialize awww if not running
+if ! pgrep -x awww-daemon > /dev/null; then
+    awww init
 fi
 
 wal -i "$WALLPAPER"
 # Apply wallpaper with a transition
-swww img "$WALLPAPER" --transition-type any --transition-fps 60 --transition-duration 2
+awww img "$WALLPAPER" --transition-type any --transition-fps 60 --transition-duration 2
 
 
 

@@ -5,4 +5,5 @@
     "editor.fontSize": 13,
     "workbench.editor.empty.hint": "hidden",
     "chat.viewSessions.orientation": "stacked",
+    "extensions.ignoreRecommendations": true,
 }
