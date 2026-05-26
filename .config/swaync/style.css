@@ -1,36 +1,4 @@
-:root {
-  --red: #ed8796;
-  --maroon: #ee99a0;
-  --pink: #f5bde6;
-  --flamingo: #f0c6c6;
-  --peach: #f5a97f;
-  --yellow: #eed49f;
-  --sky: #91d7e3;
-  --sapphire: #7dc4e4;
-  --blue: #8aadf4;
-  --text: #cad3f5;
-  --subtext0: #a5adcb;
-  --subtext1: #b8c0e0;
-  --surface1: #494d64;
-  --surface2: #5b6078;
-  --base: #363a4f;
-  --mantle: #1e2030;
-
-  --bg-primary: var(--mantle);
-  --bg-secondary: var(--base);
-  --accent: var(--peach);
-  --accent-hover: var(--flamingo);
-  --accent-active: var(--yellow);
-
-  --summary: var(--text);
-  --title: var(--text);
-  --body: var(--subtext0);
-  --time: var(--subtext0);
-  --dnd: var(--subtext0);
-  --low: var(--surface1);
-  --normal: var(--flamingo);
-  --critical: var(--red);
-}
+@import url("/home/tonio/.cache/matugen/swaync.css");
 
 * {
   all: unset;

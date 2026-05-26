@@ -21,3 +21,6 @@ alias pamcan=pacman
 #   set_color green; echo '> '
 # end
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+
+# Pi coding agent config directory
+set -gx PI_CODING_AGENT_DIR "$HOME/.config/pi/agent"

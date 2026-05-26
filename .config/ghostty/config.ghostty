@@ -15,4 +15,4 @@ app-notifications = no-clipboard-copy
 
 cursor-style = bar
 
-config-file = ~/.cache/wal/ghostty.conf
+config-file = ~/.cache/matugen/ghostty.conf

@@ -3,28 +3,22 @@
 
 local home = os.getenv("HOME") or "/home/tonio"
 
-local function read_hypr_vars(path)
-    local vars = {}
-    local file = io.open(path, "r")
-    if not file then
-        return vars
+local function load_theme_colors()
+    local ok, colors = pcall(dofile, home .. "/.cache/matugen/hyprland.lua")
+    if ok and type(colors) == "table" then
+        return colors
     end
 
-    for line in file:lines() do
-        local key, value = line:match("^%s*%$([%w_]+)%s*=%s*(.-)%s*$")
-        if key and value then
-            vars[key] = value
-        end
-    end
-
-    file:close()
-    return vars
+    return {
+        primary = "#ffb4a6",
+        outline_variant = "#534340",
+    }
 end
 
-local wal = read_hypr_vars(home .. "/.cache/wal/colors-hyprland.conf")
+local colors = load_theme_colors()
 
-local function wal_color(name, fallback)
-    return wal[name] or fallback
+local function hypr_color(hex)
+    return "rgb(" .. hex:gsub("#", "") .. ")"
 end
 
 ----------------
@@ -39,7 +33,7 @@ require("monitors")
 
 local terminal = "ghostty"
 local fileManager = "nautilus"
-local menu = "wofi --show drun -n"
+local menu = "vicinae toggle"
 local mainMod = "SUPER"
 
 ----------------
@@ -47,12 +41,12 @@ local mainMod = "SUPER"
 ----------------
 
 hl.on("hyprland.start", function()
-    hl.exec_cmd("waybar")
+    hl.exec_cmd("quickshell")
     hl.exec_cmd("awww-daemon")
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
     hl.exec_cmd("swaync")
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
-    hl.exec_cmd("wal -R")
+    hl.exec_cmd("sh -c 'vicinae server --replace >/dev/null 2>&1 &'")
 end)
 
 ----------------
@@ -79,8 +73,8 @@ hl.config({
         gaps_out = { top = 0, right = 10, bottom = 10, left = 10 },
         border_size = 2,
         col = {
-            active_border = wal_color("color9", "rgba(250,79,39,1.0)"),
-            inactive_border = wal_color("color5", "rgba(222,131,63,1.0)"),
+            active_border = hypr_color(colors.primary),
+            inactive_border = hypr_color(colors.outline_variant),
         },
         resize_on_border = false,
         allow_tearing = false,
@@ -111,28 +105,17 @@ hl.config({
     },
 })
 
-hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
-hl.curve("easeInOutCubic", { type = "bezier", points = { { 0.65, 0.05 }, { 0.36, 1 } } })
-hl.curve("linear", { type = "bezier", points = { { 0, 0 }, { 1, 1 } } })
-hl.curve("almostLinear", { type = "bezier", points = { { 0.5, 0.5 }, { 0.75, 1.0 } } })
-hl.curve("quick", { type = "bezier", points = { { 0.15, 0 }, { 0.1, 1 } } })
+hl.curve("niercurve", { type = "bezier", points = { { 0.4, 0 }, { 0.2, 1 } } })
 
-hl.animation({ leaf = "global", enabled = true, speed = 10, bezier = "default" })
-hl.animation({ leaf = "border", enabled = true, speed = 5.39, bezier = "easeOutQuint" })
-hl.animation({ leaf = "windows", enabled = true, speed = 4.79, bezier = "easeOutQuint" })
-hl.animation({ leaf = "windowsIn", enabled = true, speed = 4.1, bezier = "easeOutQuint", style = "popin 87%" })
-hl.animation({ leaf = "windowsOut", enabled = true, speed = 1.49, bezier = "linear", style = "popin 87%" })
-hl.animation({ leaf = "fadeIn", enabled = true, speed = 1.73, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeOut", enabled = true, speed = 1.46, bezier = "almostLinear" })
-hl.animation({ leaf = "fade", enabled = true, speed = 3.03, bezier = "quick" })
-hl.animation({ leaf = "layers", enabled = true, speed = 3.81, bezier = "easeOutQuint" })
-hl.animation({ leaf = "layersIn", enabled = true, speed = 4, bezier = "easeOutQuint", style = "fade" })
-hl.animation({ leaf = "layersOut", enabled = true, speed = 1.5, bezier = "linear", style = "fade" })
-hl.animation({ leaf = "fadeLayersIn", enabled = true, speed = 1.79, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.39, bezier = "almostLinear" })
-hl.animation({ leaf = "workspaces", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "workspacesIn", enabled = true, speed = 1.21, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
+hl.animation({ leaf = "windows", enabled = true, speed = 4, bezier = "niercurve", style = "slide" })
+hl.animation({ leaf = "windowsIn", enabled = true, speed = 4, bezier = "niercurve", style = "slide" })
+hl.animation({ leaf = "windowsOut", enabled = true, speed = 3, bezier = "niercurve", style = "slide" })
+hl.animation({ leaf = "fade", enabled = true, speed = 4, bezier = "niercurve" })
+hl.animation({ leaf = "fadeIn", enabled = true, speed = 4, bezier = "niercurve" })
+hl.animation({ leaf = "fadeOut", enabled = true, speed = 4, bezier = "niercurve" })
+hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "niercurve", style = "slidevert" })
+hl.animation({ leaf = "workspacesIn", enabled = true, speed = 5, bezier = "niercurve", style = "slidevert" })
+hl.animation({ leaf = "workspacesOut", enabled = true, speed = 5, bezier = "niercurve", style = "slidevert" })
 
 hl.config({
     dwindle = {
@@ -182,10 +165,10 @@ hl.device({
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("pkill wofi || ~/.config/hypr/wallpaper.sh"))
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("~/.config/hypr/wallpaper.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + SUPER_L", hl.dsp.exec_cmd("pkill wofi || " .. menu))
+hl.bind(mainMod .. " + SUPER_L", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("code"))
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("zen-browser"))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("vesktop"))
@@ -194,7 +177,7 @@ hl.bind(mainMod .. " + I", hl.dsp.exec_cmd('XDG_CURRENT_DESKTOP="gnome" gnome-co
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind("CTRL + ALT + R", hl.dsp.exec_cmd("reboot"))
 hl.bind("CTRL + ALT + Delete", hl.dsp.exec_cmd("shutdown now"))
-hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("pkill waybar & waybar || waybar"))
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("pkill quickshell; quickshell"))
 hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("steam"))
 
 hl.bind("Print", hl.dsp.exec_cmd("grim - | wl-copy"))
@@ -244,9 +227,9 @@ hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "-1" }))
 hl.bind(mainMod .. " + SHIFT + mouse_up", hl.dsp.window.move({ workspace = "+1" }))
 hl.bind(mainMod .. " + SHIFT + mouse_down", hl.dsp.window.move({ workspace = "-1" }))
 
-hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { drag = true })
+hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.float({ action = "toggle" }), { click = true })
-hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { drag = true })
+hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })

@@ -1,28 +1,28 @@
-@import url('/home/tonio/.cache/wal/colors-waybar.css');
+@import url('/home/tonio/.cache/matugen/waybar.css');
 
 window {
 margin: 0px;
-border: 1px solid @color0;
-background-color: @color0;
+border: 1px solid @background;
+background-color: @background;
 }
 
 #input {
 margin: 5px;
 border: none;
-color: @color7;
-background-color: @color8;
+color: @text;
+background-color: @light-background;
 }
 
 #inner-box {
 margin: 5px;
 border: none;
-background-color: @color0;
+background-color: @background;
 }
 
 #outer-box {
 margin: 5px;
 border: none;
-background-color: @color0;
+background-color: @background;
 }
 
 #scroll {
@@ -33,9 +33,9 @@ border: none;
 #text {
 margin: 5px;
 border: none;
-color: @color7;
+color: @text;
 }
 
 #entry:selected {
-background-color: @color8;
+background-color: @light-background;
 }
