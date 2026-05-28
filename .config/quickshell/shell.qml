@@ -14,22 +14,23 @@ import Quickshell.Services.UPower
 Scope {
     id: root
 
-    property string cpuLabel: "  ▁▁▁▁  0%"
+    property string cpuLabel: " 0%"
     property string memoryLabel: "  0.0G/0.0G"
     property string brightnessLabel: " 0%"
     property string musicArtUrl: ""
     property string swayncLabel: ""
     property var activeTrayMenuItem: null
     property var activeMusicPanel: null
-    property real previousCpuTotal: 0
-    property real previousCpuIdle: 0
+    property var previousCpuSample: null
     property var activePlayer: Mpris.players.values.find(player => player.playbackState !== MprisPlaybackState.Stopped) || Mpris.players.values[0] || null
     property var audioSink: Pipewire.defaultAudioSink
     property var battery: UPower.displayDevice
     property bool musicMenuOpen: false
     property var wiredDevice: Networking.devices.values.find(device => device.name === "enp10s0") || Networking.devices.values.find(device => device.connected)
 
-    Colors { id: colors }
+    Colors {
+        id: colors
+    }
 
     function run(command) {
         commandRunner.exec(["sh", "-c", command]);
@@ -45,13 +46,7 @@ Scope {
             return "";
 
         const metadata = player.metadata || {};
-        const candidates = [
-            player.trackArtUrl,
-            metadata["mpris:artUrl"],
-            metadata["xesam:artUrl"],
-            metadata.artUrl,
-            metadata.image,
-        ];
+        const candidates = [player.trackArtUrl, metadata["mpris:artUrl"], metadata["xesam:artUrl"], metadata.artUrl, metadata.image,];
 
         for (const candidate of candidates) {
             if (!candidate)
@@ -76,9 +71,21 @@ Scope {
         musicArtUrl = nextUrl;
     }
 
-    function barIcon(percent) {
-        const icons = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
-        return icons[Math.max(0, Math.min(icons.length - 1, Math.floor(percent / 13)))];
+    function parseCpuSample(parts) {
+        const user = Number(parts[0] || 0) - Number(parts[8] || 0);
+        const nice = Number(parts[1] || 0) - Number(parts[9] || 0);
+        const system = Number(parts[2] || 0);
+        const idle = Number(parts[3] || 0);
+        const iowait = Number(parts[4] || 0);
+        const irq = Number(parts[5] || 0);
+        const softirq = Number(parts[6] || 0);
+        const steal = Number(parts[7] || 0);
+        const idleTotal = idle + iowait;
+        const busyTotal = user + nice + system + irq + softirq + steal;
+        return {
+            idle: idleTotal,
+            total: idleTotal + busyTotal,
+        };
     }
 
     function audioIcon(percent) {
@@ -99,6 +106,13 @@ Scope {
     function batteryIcon(percent) {
         const icons = ["", "", "", "", ""];
         return icons[Math.max(0, Math.min(icons.length - 1, Math.floor(percent / 25)))];
+    }
+
+    function batteryStatusIcon(percent) {
+        if (battery && (battery.state === UPowerDeviceState.Charging || battery.state === UPowerDeviceState.PendingCharge))
+            return "󰂄";
+
+        return batteryIcon(percent);
     }
 
     function activeWindowLabel() {
@@ -142,32 +156,41 @@ Scope {
         if (!battery || !battery.ready || !battery.isPresent || battery.percentage <= 0)
             return "";
 
-        const percent = Math.round(battery.percentage);
-        const icon = battery.state === UPowerDeviceState.Charging ? "" : battery.state === UPowerDeviceState.FullyCharged ? "" : batteryIcon(percent);
+        const percent = Math.round(battery.percentage * 100);
+        const icon = batteryStatusIcon(percent);
         return icon + " " + percent + "%";
     }
 
     function updateCpu(raw) {
-        const parts = raw.trim().split(/\s+/);
-        if (parts.length < 2)
+        const fields = raw.trim().split(/\s+/);
+        if (fields.length < 5)
             return;
 
-        const total = Number(parts[0]);
-        const idle = Number(parts[1]);
-        if (previousCpuTotal > 0) {
-            const totalDelta = total - previousCpuTotal;
-            const idleDelta = idle - previousCpuIdle;
-            const usage = totalDelta > 0 ? Math.round((1 - idleDelta / totalDelta) * 100) : 0;
-            const icon = barIcon(usage);
-            cpuLabel = "  " + icon + icon + icon + icon + " " + String(usage).padStart(2, " ") + "%";
+        if (fields[0] === "cpu")
+            fields.shift();
+
+        const sample = parseCpuSample(fields);
+        if (!previousCpuSample) {
+            previousCpuSample = sample;
+            return;
         }
-        previousCpuTotal = total;
-        previousCpuIdle = idle;
+
+        const totalDelta = sample.total - previousCpuSample.total;
+        const idleDelta = sample.idle - previousCpuSample.idle;
+        const usage = totalDelta > 0 ? Math.round((1 - idleDelta / totalDelta) * 100) : 0;
+        const clampedUsage = Math.max(0, Math.min(100, usage));
+
+        previousCpuSample = sample;
+        cpuLabel = " " + String(clampedUsage).padStart(2, " ") + "%";
     }
 
-    Process { id: commandRunner }
+    Process {
+        id: commandRunner
+    }
 
-    PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
+    PwObjectTracker {
+        objects: [Pipewire.defaultAudioSink]
+    }
 
     SystemClock {
         id: clock
@@ -176,14 +199,18 @@ Scope {
 
     Process {
         id: cpuProc
-        command: ["sh", "-c", "awk '/^cpu / { idle=$5; total=0; for (i=2; i<=NF; i++) total += $i; print total, idle }' /proc/stat"]
-        stdout: StdioCollector { onStreamFinished: root.updateCpu(this.text) }
+        command: ["sh", "-c", "awk '/^cpu / { print; exit }' /proc/stat"]
+        stdout: StdioCollector {
+            onStreamFinished: root.updateCpu(this.text)
+        }
     }
 
     Process {
         id: memoryProc
         command: ["sh", "-c", "free -m | awk '/Mem:/ { printf \"  %.1fG/%.1fG\", $3 / 1024, $2 / 1024 }'"]
-        stdout: StdioCollector { onStreamFinished: root.memoryLabel = this.text.trim() || root.memoryLabel }
+        stdout: StdioCollector {
+            onStreamFinished: root.memoryLabel = this.text.trim() || root.memoryLabel
+        }
     }
 
     Process {
@@ -200,20 +227,54 @@ Scope {
     Process {
         id: swayncProc
         command: ["sh", "-c", "count=$(swaync-client -c 2>/dev/null || printf 0); [ \"$count\" -gt 0 ] 2>/dev/null && printf '' || printf ''"]
-        stdout: StdioCollector { onStreamFinished: root.swayncLabel = this.text.trim() || "" }
+        stdout: StdioCollector {
+            onStreamFinished: root.swayncLabel = this.text.trim() || ""
+        }
     }
 
     Process {
         id: musicArtProc
         command: ["sh", "-c", "playerctl metadata --format '{{mpris:artUrl}}' 2>/dev/null || true"]
-        stdout: StdioCollector { onStreamFinished: root.updateMusicArt(this.text) }
+        stdout: StdioCollector {
+            onStreamFinished: root.updateMusicArt(this.text)
+        }
     }
 
-    Timer { interval: 1000; running: true; repeat: true; triggeredOnStart: true; onTriggered: cpuProc.exec(cpuProc.command) }
-    Timer { interval: 30000; running: true; repeat: true; triggeredOnStart: true; onTriggered: memoryProc.exec(memoryProc.command) }
-    Timer { interval: 2000; running: true; repeat: true; triggeredOnStart: true; onTriggered: brightnessProc.exec(brightnessProc.command) }
-    Timer { interval: 2000; running: true; repeat: true; triggeredOnStart: true; onTriggered: swayncProc.exec(swayncProc.command) }
-    Timer { interval: 1500; running: true; repeat: true; triggeredOnStart: true; onTriggered: musicArtProc.exec(musicArtProc.command) }
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: cpuProc.exec(cpuProc.command)
+    }
+    Timer {
+        interval: 30000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: memoryProc.exec(memoryProc.command)
+    }
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: brightnessProc.exec(brightnessProc.command)
+    }
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: swayncProc.exec(swayncProc.command)
+    }
+    Timer {
+        interval: 1500
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: musicArtProc.exec(musicArtProc.command)
+    }
 
     component Pill: Rectangle {
         id: pill
@@ -284,7 +345,7 @@ Scope {
         property color baseColor: colors.background
         property color hoverColor: colors.lightBackground
         property color iconColor: colors.foreground
-        signal pressed()
+        signal pressed
 
         color: buttonMouse.containsMouse && enabled ? hoverColor : baseColor
         radius: 8
@@ -502,9 +563,7 @@ Scope {
 
                                         Text {
                                             width: parent.width
-                                            text: root.activePlayer
-                                                ? (root.activePlayer.trackTitle || root.activePlayer.identity || "Nothing playing")
-                                                : "Nothing playing"
+                                            text: root.activePlayer ? (root.activePlayer.trackTitle || root.activePlayer.identity || "Nothing playing") : "Nothing playing"
                                             color: colors.foreground
                                             font.family: "SpaceMono Nerd Font"
                                             font.pixelSize: 15
@@ -514,9 +573,7 @@ Scope {
 
                                         Text {
                                             width: parent.width
-                                            text: root.activePlayer
-                                                ? (root.activePlayer.trackArtist || root.activePlayer.trackAlbumArtist || "Unknown artist")
-                                                : ""
+                                            text: root.activePlayer ? (root.activePlayer.trackArtist || root.activePlayer.trackAlbumArtist || "Unknown artist") : ""
                                             color: colors.textActive
                                             font.family: "SpaceMono Nerd Font"
                                             font.pixelSize: 14
@@ -525,9 +582,7 @@ Scope {
 
                                         Text {
                                             width: parent.width
-                                            text: root.activePlayer
-                                                ? (root.activePlayer.trackAlbum || root.activePlayer.identity || "")
-                                                : ""
+                                            text: root.activePlayer ? (root.activePlayer.trackAlbum || root.activePlayer.identity || "") : ""
                                             color: colors.outline
                                             font.family: "SpaceMono Nerd Font"
                                             font.pixelSize: 13
@@ -701,11 +756,7 @@ Scope {
                                                                         anchors.left: parent.left
                                                                         anchors.verticalCenter: parent.verticalCenter
                                                                         width: visible ? implicitWidth : 0
-                                                                        text: trayMenuEntry.modelData.buttonType === QsMenuButtonType.RadioButton
-                                                                            ? (trayMenuEntry.modelData.checkState === Qt.Checked ? "◉" : "○")
-                                                                            : (trayMenuEntry.modelData.buttonType === QsMenuButtonType.CheckBox
-                                                                                ? (trayMenuEntry.modelData.checkState === Qt.PartiallyChecked ? "-" : (trayMenuEntry.modelData.checkState === Qt.Checked ? "✓" : "☐"))
-                                                                                : "")
+                                                                        text: trayMenuEntry.modelData.buttonType === QsMenuButtonType.RadioButton ? (trayMenuEntry.modelData.checkState === Qt.Checked ? "◉" : "○") : (trayMenuEntry.modelData.buttonType === QsMenuButtonType.CheckBox ? (trayMenuEntry.modelData.checkState === Qt.PartiallyChecked ? "-" : (trayMenuEntry.modelData.checkState === Qt.Checked ? "✓" : "☐")) : "")
                                                                         visible: trayMenuEntry.modelData.buttonType !== QsMenuButtonType.None
                                                                         color: colors.textActive
                                                                         font.family: "SpaceMono Nerd Font"
@@ -731,9 +782,7 @@ Scope {
                                                                         anchors.rightMargin: submenuArrow.visible ? 12 : 0
                                                                         anchors.verticalCenter: parent.verticalCenter
                                                                         text: trayMenuEntry.modelData.text || ""
-                                                                        textColor: trayMenuEntry.modelData.enabled
-                                                                            ? (entryMouse.containsMouse ? colors.textActive : colors.foreground)
-                                                                            : colors.outline
+                                                                        textColor: trayMenuEntry.modelData.enabled ? (entryMouse.containsMouse ? colors.textActive : colors.foreground) : colors.outline
                                                                         fontFamily: "SpaceMono Nerd Font"
                                                                         pixelSize: 14
                                                                         hovered: entryMouse.containsMouse
@@ -853,9 +902,7 @@ Scope {
                                                                                         anchors.rightMargin: 10
                                                                                         anchors.verticalCenter: parent.verticalCenter
                                                                                         text: submenuEntry.modelData.text || ""
-                                                                                        textColor: submenuEntry.modelData.enabled
-                                                                                            ? (submenuMouse.containsMouse ? colors.textActive : colors.foreground)
-                                                                                            : colors.outline
+                                                                                        textColor: submenuEntry.modelData.enabled ? (submenuMouse.containsMouse ? colors.textActive : colors.foreground) : colors.outline
                                                                                         fontFamily: "SpaceMono Nerd Font"
                                                                                         pixelSize: 14
                                                                                         hovered: submenuMouse.containsMouse
@@ -934,8 +981,7 @@ Scope {
                                                         showMenu();
                                                     else
                                                         modelData.activate();
-                                                }
-                                                else if (mouse.button === Qt.MiddleButton)
+                                                } else if (mouse.button === Qt.MiddleButton)
                                                     modelData.secondaryActivate();
                                                 else if (modelData.hasMenu)
                                                     showMenu();
@@ -951,8 +997,14 @@ Scope {
                             onRunCommand: command => root.run(command)
                         }
 
-                        Pill { label: root.cpuLabel; command: "ghostty -e btm" }
-                        Pill { label: root.memoryLabel; command: "ghostty -e btm" }
+                        Pill {
+                            label: root.cpuLabel
+                            command: "ghostty -e btm"
+                        }
+                        Pill {
+                            label: root.memoryLabel
+                            command: "ghostty -e btm"
+                        }
 
                         Rectangle {
                             color: colors.background
@@ -965,11 +1017,24 @@ Scope {
                                 anchors.centerIn: parent
                                 spacing: 10
 
-                                Segment { label: root.volumeText(); command: "pavucontrol" }
-                                Segment { label: root.brightnessLabel }
-                                Segment { label: root.networkText(); command: "XDG_CURRENT_DESKTOP='gnome' gnome-control-center network" }
-                                Segment { label: root.bluetoothText(); command: "blueman-manager" }
-                                Segment { label: root.batteryText(); command: "wlogout" }
+                                Segment {
+                                    label: root.volumeText()
+                                    command: "pavucontrol"
+                                }
+                                Segment {
+                                    label: root.brightnessLabel
+                                }
+                                Segment {
+                                    label: root.networkText()
+                                    command: "XDG_CURRENT_DESKTOP='gnome' gnome-control-center network"
+                                }
+                                Segment {
+                                    label: root.bluetoothText()
+                                    command: "blueman-manager"
+                                }
+                                Segment {
+                                    label: root.batteryText()
+                                }
                             }
                         }
 

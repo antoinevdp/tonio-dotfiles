@@ -174,7 +174,7 @@ Item {
                     export TARGET_MONITORS="${escOutputs}"
                     
                     cp "$DEST_FILE" ${paths.getCacheDir("wallpaper_picker")}/current_wallpaper.png || true
-                    printf '%s\n' "$DEST_FILE" > "$HOME/.config/hypr/current_wallpaper"
+                    printf '$wallpaper = %s\n' "$DEST_FILE" > "$HOME/.config/hypr/current_wallpaper"
                     
                     echo "" >> ${logFile}
                     echo "[$(date +'%H:%M:%S.%3N')] APPLYING CACHED SEARCH: $DEST_FILE TO $TARGET_MONITORS" >> ${logFile}
@@ -220,7 +220,7 @@ Item {
                         magick "$DEST_FILE" -resize x420 -quality 70 "$FINAL_THUMB" || true
                         
                         cp "$DEST_FILE" ${paths.getCacheDir("wallpaper_picker")}/current_wallpaper.png || true
-                        printf '%s\n' "$DEST_FILE" > "$HOME/.config/hypr/current_wallpaper"
+                        printf '$wallpaper = %s\n' "$DEST_FILE" > "$HOME/.config/hypr/current_wallpaper"
                         
                         echo "" >> ${logFile}
                         echo "[$(date +'%H:%M:%S.%3N')] APPLYING NEW DOWNLOAD: $DEST_FILE TO $TARGET_MONITORS" >> ${logFile}
@@ -276,7 +276,7 @@ Item {
 
         const fullScript = `
             cp "${isVideo ? escThumb : escOriginal}" ${paths.getCacheDir("wallpaper_picker")}/current_wallpaper.png || true
-            printf '%s\n' "${escOriginal}" > "$HOME/.config/hypr/current_wallpaper"
+            printf '$wallpaper = %s\n' "${escOriginal}" > "$HOME/.config/hypr/current_wallpaper"
             
             ${wallpaperCmd}
             ( matugen image "${escThumb}" --type scheme-tonal-spot --mode dark --source-color-index 0 || true; bash "${escReload}" || true ) &
