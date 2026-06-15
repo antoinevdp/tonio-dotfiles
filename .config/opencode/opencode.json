@@ -1,16 +1,17 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "opencode-gemini-auth@latest"
+    "opencode-gemini-auth@latest",
+    "superpowers@git+https://github.com/obra/superpowers.git"
   ],
   "agent": {
     "general": {
-      "model": "github-copilot/gpt-5.4-mini",
-      "variant": "high"
+      "model": "openai/gpt-5.4-mini",
+      "variant": "xhigh"
     },
     "review": {
-      "model": "github-copilot/gpt-5.4-mini",
-      "variant": "high"
+      "model": "openai/gpt-5.4-mini",
+      "variant": "xhigh"
     }
   },
   "mcp": {
@@ -33,12 +34,14 @@
     },
     "playwright": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@playwright/mcp"
-      ],
+      "command": ["npx", "-y", "@playwright/mcp"],
       "enabled": true
+    }
+  },
+  "references": {
+    "opencode-local": {
+      "path": "~/.local/share/opencode",
+      "description": "This folder contains your logs and your database. You can use it to introspect yourself and figure out any issues."
     }
   }
 }

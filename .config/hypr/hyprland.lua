@@ -35,6 +35,7 @@ local terminal = "ghostty"
 local fileManager = "nautilus"
 local menu = "vicinae toggle"
 local mainMod = "SUPER"
+local moveWorkspaceWindows = home .. "/.config/hypr/move-workspace-windows.sh"
 
 ----------------
 -- Autostart
@@ -205,21 +206,22 @@ hl.define_submap("resize", function()
 end)
 
 local workspace_keys = {
-    { key = "ampersand", workspace = "1" },
-    { key = "eacute", workspace = "2" },
-    { key = "quotedbl", workspace = "3" },
+    { key = "ampersand",  workspace = "1" },
+    { key = "eacute",     workspace = "2" },
+    { key = "quotedbl",   workspace = "3" },
     { key = "apostrophe", workspace = "4" },
-    { key = "parenleft", workspace = "5" },
-    { key = "minus", workspace = "6" },
-    { key = "egrave", workspace = "7" },
+    { key = "parenleft",  workspace = "5" },
+    { key = "minus",      workspace = "6" },
+    { key = "egrave",     workspace = "7" },
     { key = "underscore", workspace = "8" },
-    { key = "ccedilla", workspace = "9" },
-    { key = "agrave", workspace = "10" },
+    { key = "ccedilla",   workspace = "9" },
+    { key = "agrave",     workspace = "10" },
 }
 
 for _, item in ipairs(workspace_keys) do
     hl.bind(mainMod .. " + " .. item.key, hl.dsp.focus({ workspace = item.workspace }))
     hl.bind(mainMod .. " + SHIFT + " .. item.key, hl.dsp.window.move({ workspace = item.workspace, follow = false }))
+    hl.bind(mainMod .. " + CTRL + SHIFT + " .. item.key, hl.dsp.exec_cmd(moveWorkspaceWindows .. " " .. item.workspace))
 end
 
 hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "+1" }))
@@ -231,10 +233,14 @@ hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.float({ action = "toggle" }), { click = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true, repeating = true })
-hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true, repeating = true })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+    { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+    { locked = true, repeating = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),
+    { locked = true, repeating = true })
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),
+    { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
 
@@ -251,6 +257,27 @@ hl.window_rule({
     name = "suppress-maximize-events",
     match = { class = ".*" },
     suppress_event = "maximize",
+})
+
+hl.window_rule({
+    name = "vesktop-workspace-1",
+    match = { class = "^vesktop$" },
+    workspace = "1 silent",
+    focus_on_activate = false,
+})
+
+hl.window_rule({
+    name = "zen-workspace-2",
+    match = { class = "^zen$" },
+    workspace = "2 silent",
+    focus_on_activate = false,
+})
+
+hl.window_rule({
+    name = "code-workspace-3",
+    match = { class = "^(Code|code)$" },
+    workspace = "3 silent",
+    focus_on_activate = false,
 })
 
 hl.window_rule({
