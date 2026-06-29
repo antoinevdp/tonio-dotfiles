@@ -169,6 +169,7 @@ hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("~/.config/hypr/wallpaper.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.pin({ action = "toggle" }))
 hl.bind(mainMod .. " + SUPER_L", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("code"))
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("zen-browser"))
@@ -278,6 +279,22 @@ hl.window_rule({
     match = { class = "^(Code|code)$" },
     workspace = "3 silent",
     focus_on_activate = false,
+})
+
+hl.window_rule({
+    name = "zen-pip-sticky",
+    match = {
+        class = "^zen$",
+        title = "^Picture-in-Picture$",
+    },
+    float = true,
+    pin = true,
+    focus_on_activate = false,
+    size = { 480, 270 },
+    move = {
+        "monitor_w - window_w - 24",
+        "monitor_h - window_h - 24",
+    },
 })
 
 hl.window_rule({

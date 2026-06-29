@@ -24,3 +24,14 @@ alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
 # Pi coding agent config directory
 set -gx PI_CODING_AGENT_DIR "$HOME/.config/pi/agent"
+
+# TeX Live 2026
+if not contains -- /usr/local/texlive/2026/texmf-dist/doc/man $MANPATH
+    set -gx MANPATH /usr/local/texlive/2026/texmf-dist/doc/man "" $MANPATH
+end
+
+if not contains -- /usr/local/texlive/2026/texmf-dist/doc/info $INFOPATH
+    set -gx INFOPATH /usr/local/texlive/2026/texmf-dist/doc/info "" $INFOPATH
+end
+
+fish_add_path /usr/local/texlive/2026/bin/x86_64-linux
