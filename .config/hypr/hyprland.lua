@@ -225,10 +225,10 @@ for _, item in ipairs(workspace_keys) do
     hl.bind(mainMod .. " + CTRL + SHIFT + " .. item.key, hl.dsp.exec_cmd(moveWorkspaceWindows .. " " .. item.workspace))
 end
 
-hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "+1" }))
-hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "-1" }))
-hl.bind(mainMod .. " + SHIFT + mouse_up", hl.dsp.window.move({ workspace = "+1" }))
-hl.bind(mainMod .. " + SHIFT + mouse_down", hl.dsp.window.move({ workspace = "-1" }))
+hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "-1" }))
+hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "+1" }))
+hl.bind(mainMod .. " + SHIFT + mouse_up", hl.dsp.window.move({ workspace = "-1" }))
+hl.bind(mainMod .. " + SHIFT + mouse_down", hl.dsp.window.move({ workspace = "+1" }))
 
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.float({ action = "toggle" }), { click = true })

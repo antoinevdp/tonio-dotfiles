@@ -54,12 +54,15 @@ fi
 
 jq -c '
     .result.rateLimits as $limits
+    | [$limits.primary, $limits.secondary] as $windows
+    | ($windows | map(select(.windowDurationMins == 300)) | first) as $five_hour
+    | ($windows | map(select(.windowDurationMins == 10080)) | first) as $weekly
     | {
         status: "ok",
-        five_hour_used_percent: ($limits.primary.usedPercent // -1),
-        weekly_used_percent: ($limits.secondary.usedPercent // -1),
-        reset_at: (($limits.primary.resetsAt // 0) | if . > 0 then todateiso8601 else "" end),
-        weekly_reset_at: (($limits.secondary.resetsAt // 0) | if . > 0 then todateiso8601 else "" end),
+        five_hour_used_percent: ($five_hour.usedPercent // (if ($limits.primary.windowDurationMins // 300) == 300 then $limits.primary.usedPercent else -1 end) // -1),
+        weekly_used_percent: ($weekly.usedPercent // $limits.secondary.usedPercent // (if ($limits.primary.windowDurationMins // 0) == 10080 then $limits.primary.usedPercent else -1 end) // -1),
+        reset_at: (($five_hour.resetsAt // (if ($limits.primary.windowDurationMins // 300) == 300 then $limits.primary.resetsAt else 0 end) // 0) | if . > 0 then todateiso8601 else "" end),
+        weekly_reset_at: (($weekly.resetsAt // $limits.secondary.resetsAt // (if ($limits.primary.windowDurationMins // 0) == 10080 then $limits.primary.resetsAt else 0 end) // 0) | if . > 0 then todateiso8601 else "" end),
         plan_type: ($limits.planType // ""),
         has_credits: ($limits.credits.hasCredits // false),
         credits_balance: ($limits.credits.balance // "")
