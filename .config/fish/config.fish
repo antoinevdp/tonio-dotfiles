@@ -12,6 +12,11 @@ if status is-interactive
 
 end
 
+# Prefer the saved universal token over a same-named variable inherited from the parent.
+if set -qU GITHUB_MCP_PAT; and set -qg GITHUB_MCP_PAT
+    set -eg GITHUB_MCP_PAT
+end
+
 starship init fish | source
 
 alias pamcan=pacman
